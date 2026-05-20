@@ -340,7 +340,7 @@ footer{padding:56px 5% 36px;background:var(--navy);}
         <a href="#how" class="btn-g">How It Works</a>
       </div>
       <div class="stats fu d5">
-        <div><div class="sn" id="hero-c">4,821</div><div class="sl">On the Waitlist</div></div>
+        <div><div class="sn" id="hero-c">247</div><div class="sl">On the Waitlist</div></div>
         <div><div class="sn">$0</div><div class="sl">Setup Cost</div></div>
         <div><div class="sn">1 Bill</div><div class="sl">That's It</div></div>
       </div>
@@ -497,7 +497,7 @@ footer{padding:56px 5% 36px;background:var(--navy);}
       <h2 class="h2">Help Us<br>Negotiate.</h2>
       <p style="color:var(--grey-l);font-size:16px;max-width:540px;margin:.8rem auto 0;line-height:1.6;">Our discount from streaming platforms grows with subscriber volume. Every person on this waitlist gives us more leverage and lowers the price for everyone at launch.</p>
     </div>
-    <div class="prog-lbl">Currently at <strong id="prog-c">4,821</strong> signups. <span class="lime">179 away from Tier 2 →</span></div>
+    <div class="prog-lbl">Currently at <strong id="prog-c">247</strong> signups. <span class="lime">179 away from Tier 2 →</span></div>
     <div class="prog-track">
       <div class="prog-bg"><div class="prog-fill" id="prog-fill"></div></div>
       <div class="t-marks">
@@ -585,7 +585,7 @@ footer{padding:56px 5% 36px;background:var(--navy);}
 <!-- WAITLIST -->
 <section class="waitlist" id="waitlist">
   <div class="inner">
-    <div class="wl-pill"><span class="wl-dot"></span><span id="wl-c">4,821</span> Kiwis on the waitlist</div>
+    <div class="wl-pill"><span class="wl-dot"></span><span id="wl-c">247</span> Kiwis on the waitlist</div>
     <h2>One Bill.<br><span class="lime">Done.</span></h2>
     <p class="wl-sub">Join the waitlist. Be part of the movement saving Kiwis money on streaming, and be first to access StreamStack when we launch.</p>
     <div class="wl-form">
@@ -641,7 +641,7 @@ footer{padding:56px 5% 36px;background:var(--navy);}
 </footer>
 
 <script>
-var count = 4821;
+var count = 247;
 var T1 = 5000, T2 = 10000;
 // KLAVIYO LIVE COUNT
 // Replace YOUR_PRIVATE_KEY_HERE with your Klaviyo private key (read-only)
@@ -649,7 +649,7 @@ var T1 = 5000, T2 = 10000;
 // (Find list ID in Klaviyo → Lists → click your list → URL shows the ID)
 var KLAVIYO_KEY = 'pk_Wcz5Pp_05ffec49ddc64c36c72356f2ae8b4dd489';
 var KLAVIYO_LIST_ID = 'TKeL8u';
-
+  
 function fetchKlaviyoCount() {
   if (KLAVIYO_KEY === 'YOUR_PRIVATE_KEY_HERE') return; // skip if not set
   fetch('https://a.klaviyo.com/api/lists/' + KLAVIYO_LIST_ID + '/profiles/?additional-fields[profile]=subscriptions&page[size]=1', {
@@ -715,10 +715,30 @@ function signup() {
     return;
   }
 
-  // Push to Klaviyo list
+  // Capture selected platforms
+  var selectedPlatforms = [];
+  document.querySelectorAll('.pcard.selected').forEach(function(p) {
+    selectedPlatforms.push(p.getAttribute('data-name'));
+  });
+
+  // Push to Klaviyo with platform data
   if (window.klaviyo) {
-    klaviyo.push(['identify', { email: v }]);
-    klaviyo.push(['track', 'Waitlist Signup', { email: v, source: 'StreamStack Website' }]);
+    klaviyo.push(['identify', {
+      email: v,
+      'Platforms Selected': selectedPlatforms.join(', '),
+      'Platform Count': selectedPlatforms.length,
+      'Wants Netflix': selectedPlatforms.indexOf('Netflix') > -1,
+      'Wants Neon': selectedPlatforms.indexOf('Neon') > -1,
+      'Wants Disney+': selectedPlatforms.indexOf('Disney+') > -1,
+      'Wants Prime Video': selectedPlatforms.indexOf('Prime Video') > -1,
+      'Wants Apple TV+': selectedPlatforms.indexOf('Apple TV+') > -1,
+      'Signup Source': 'StreamStack Website'
+    }]);
+    klaviyo.push(['track', 'Waitlist Signup', {
+      email: v,
+      platforms: selectedPlatforms,
+      platform_count: selectedPlatforms.length
+    }]);
   }
 
   // Show success
