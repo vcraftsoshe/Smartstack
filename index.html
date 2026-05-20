@@ -895,12 +895,13 @@
         const rank = i < 3
           ? `<span class="lb-rank ${medalClass[i]}">${medals[i]}</span>`
           : `<span class="lb-rank">#${i + 1}</span>`;
-        const name = row.email_prefix || row.referrer || '???';
+        const name = row.email_prefix || row.name || row.referrer || '???';
+        const count = row.referral_count ?? row.count ?? 0;
         html += `
           <div class="lb-row">
             ${rank}
             <span class="lb-name">${name}</span>
-            <span class="lb-count">${row.count} ref${row.count !== 1 ? 's' : ''}</span>
+            <span class="lb-count">${count} ref${count !== 1 ? 's' : ''}</span>
           </div>`;
       });
 
