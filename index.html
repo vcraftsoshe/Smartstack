@@ -805,7 +805,13 @@ function signup() {
                 email: v,
                 properties: {
                   platforms_selected: selectedPlatforms.join(', '),
-                  platform_count: selectedPlatforms.length
+                  platform_count: selectedPlatforms.length,
+                  wants_netflix: selectedPlatforms.indexOf('Netflix') > -1,
+                  wants_neon: selectedPlatforms.indexOf('Neon') > -1,
+                  wants_disney: selectedPlatforms.indexOf('Disney+') > -1,
+                  wants_prime: selectedPlatforms.indexOf('Prime Video') > -1,
+                  wants_appletv: selectedPlatforms.indexOf('Apple TV+') > -1,
+                  signup_source: 'StreamStack Website'
                 }
               }
             }
