@@ -562,7 +562,7 @@ function renderLeaderboard(entries) {
   var list = document.getElementById('leaderboard-list');
   if (!list) return;
   var medals = ['🥇','🥈','🥉'];
-  var html = entries.map(function(entry, i) {
+  var html = entries.slice(0, 3).map(function(entry, i) {
     var refs = parseInt(entry.referral_count) || 0;
     var cls = i < 3 ? 'lb-row top3' : 'lb-row rest';
     return '<div class="' + cls + '">'
