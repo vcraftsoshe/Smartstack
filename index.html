@@ -496,7 +496,7 @@ src="https://www.facebook.com/tr?id=1828185614828889&ev=PageView&noscript=1"
       </div>
       <div style="max-width:480px;margin:0 auto 10px;display:flex;align-items:center;gap:10px;justify-content:center;position:relative;z-index:1;">
         <input type="checkbox" id="nz-check" style="width:18px;height:18px;accent-color:var(--lime);cursor:pointer;flex-shrink:0;" />
-        <label for="nz-check" style="font-size:13px;color:var(--grey-l);cursor:pointer;">Yep, I'm a Kiwi 🇳🇿</label>
+        <label for="nz-check" style="font-size:13px;color:var(--grey-l);cursor:pointer;">Yep, I live in NZ 🇳🇿</label>
       </div>
       <div style="max-width:480px;margin:0 auto 16px;text-align:center;position:relative;z-index:1;">
         <span onclick="document.getElementById('manual-ref-row').style.display=document.getElementById('manual-ref-row').style.display==='none'?'block':'none'" style="font-size:12px;color:var(--grey);cursor:pointer;text-decoration:underline;text-underline-offset:3px;">Have a referral code?</span>
@@ -943,6 +943,104 @@ document.addEventListener('DOMContentLoaded', function(){
   });
 });
 
+</script>
+
+<!-- Exit Intent Popup -->
+<div id="exit-popup" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.75);backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:20px;">
+  <div style="background:var(--navy-mid);border:1px solid var(--bdr);border-radius:20px;padding:40px 32px;max-width:480px;width:100%;text-align:center;position:relative;box-shadow:0 0 80px rgba(184,224,0,0.15);">
+    <button onclick="closeExitPopup()" style="position:absolute;top:16px;right:16px;background:none;border:none;color:var(--grey);font-size:22px;cursor:pointer;line-height:1;">×</button>
+    <div style="font-size:40px;margin-bottom:16px;">🙏</div>
+    <h3 style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:clamp(28px,5vw,42px);text-transform:uppercase;line-height:.95;letter-spacing:-1px;margin-bottom:12px;color:var(--white);">Before You Go<br><span style="color:var(--lime);">We Really Need Your Help.</span></h3>
+    <p style="font-size:15px;color:var(--grey-l);line-height:1.65;margin-bottom:24px;">Signing up takes 10 seconds and costs nothing. But every Kiwi on this waitlist gives us real negotiating power with Netflix, Neon etc. You could save $160+ a year when we launch.</p>
+    <div style="display:flex;gap:8px;max-width:380px;margin:0 auto 12px;">
+      <input id="exit-email" type="email" placeholder="your@email.com" style="flex:1;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);padding:13px 16px;font-family:'Barlow',sans-serif;font-size:15px;color:var(--white);outline:none;border-radius:6px;min-width:0;" />
+      <button onclick="exitSignup()" style="background:var(--lime);color:var(--navy);border:none;padding:13px 20px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:15px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;border-radius:6px;white-space:nowrap;">I'm In</button>
+    </div>
+    <div id="exit-nz" style="display:flex;align-items:center;gap:8px;justify-content:center;margin-bottom:16px;">
+      <input type="checkbox" id="exit-nz-check" style="width:16px;height:16px;accent-color:var(--lime);cursor:pointer;" />
+      <label for="exit-nz-check" style="font-size:13px;color:var(--grey-l);cursor:pointer;">Yep, I live in NZ 🇳🇿</label>
+    </div>
+    <div id="exit-ok" style="display:none;color:var(--lime);font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:700;padding:8px;">🎉 You're on the list!</div>
+    <button onclick="closeExitPopup()" style="background:none;border:none;color:var(--grey);font-size:13px;cursor:pointer;text-decoration:underline;text-underline-offset:3px;">No thanks, I'll pay full price</button>
+  </div>
+</div>
+
+<script>
+var exitShown = false;
+
+function showExitPopup() {
+  if (exitShown) return;
+  var wlOk = document.getElementById('wl-ok');
+  if (wlOk && wlOk.style.display === 'block') return; // already signed up
+  exitShown = true;
+  var popup = document.getElementById('exit-popup');
+  if (popup) { popup.style.display = 'flex'; document.body.style.overflow = 'hidden'; }
+}
+
+function closeExitPopup() {
+  var popup = document.getElementById('exit-popup');
+  if (popup) { popup.style.display = 'none'; document.body.style.overflow = ''; }
+}
+
+function exitSignup() {
+  var emailEl = document.getElementById('exit-email');
+  var nzCheck = document.getElementById('exit-nz-check');
+  if (!emailEl || !isValidEmail(emailEl.value.trim())) {
+    emailEl.style.borderColor = '#FF6B6B';
+    setTimeout(function(){ emailEl.style.borderColor = ''; }, 2000);
+    return;
+  }
+  if (nzCheck && !nzCheck.checked) {
+    document.querySelector('label[for="exit-nz-check"]').style.color = '#FF6B6B';
+    setTimeout(function(){ document.querySelector('label[for="exit-nz-check"]').style.color = ''; }, 2000);
+    return;
+  }
+  var v = emailEl.value.trim();
+  // Post to Worker
+  fetch(WORKER_URL + '/signup', {
+    method: 'POST', mode: 'cors',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: v, platforms: [], display_name: '', ref: null })
+  }).then(function(r){ return r.json(); })
+  .then(function(data){
+    if (data && data.count) { count = data.count; setAll(count); updateTierLabel(); bar(); }
+  }).catch(function(){});
+  // Klaviyo
+  fetch('https://a.klaviyo.com/client/subscriptions/?company_id=Wcz5Pp', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', 'revision': '2024-10-15' },
+    body: JSON.stringify({ data: { type: 'subscription', attributes: { list_id: 'TKeL8u', channels: { email: { consent: ['MARKETING'] } }, profile: { data: { type: 'profile', attributes: { email: v, properties: { signup_source: 'Exit Intent' } } } } } } })
+  }).catch(function(){});
+  document.getElementById('exit-ok').style.display = 'block';
+  document.getElementById('exit-email').style.display = 'none';
+  document.getElementById('exit-nz').style.display = 'none';
+  document.querySelector('#exit-popup button:last-child').style.display = 'none';
+  document.querySelector('#exit-popup .wl-btn, #exit-popup button[onclick="exitSignup()"]');
+  setTimeout(closeExitPopup, 2500);
+}
+
+// Desktop — mouse leaves toward top of page
+document.addEventListener('mouseleave', function(e) {
+  if (e.clientY < 50) showExitPopup();
+});
+
+// Mobile — show after 40 seconds of inactivity
+var mobileTimer = setTimeout(function(){
+  if (window.innerWidth < 900) showExitPopup();
+}, 40000);
+
+// Reset timer on scroll
+document.addEventListener('scroll', function(){
+  clearTimeout(mobileTimer);
+  mobileTimer = setTimeout(function(){
+    if (window.innerWidth < 900) showExitPopup();
+  }, 40000);
+});
+
+// Close on backdrop click
+document.getElementById('exit-popup').addEventListener('click', function(e){
+  if (e.target === this) closeExitPopup();
+});
 </script>
 </body>
 </html>
